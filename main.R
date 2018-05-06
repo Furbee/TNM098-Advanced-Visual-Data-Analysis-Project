@@ -92,3 +92,13 @@ split = unique(split[,.(edge_1,edge_2,sum(dummy)),by=key])[,2:4,with=F]
 lol <- as.data.table(split)
 #g <- graph.data.frame(lol)
 #plot(g, edge.arrow.size = 0.1,vertex.label=NA)
+
+#Testing only. Every 5 minute for one hour with one hour break from 12:00.
+test2 <- data_fri
+test2 <- test2[!test2$from != 1278894,]
+test2 <- as.data.table(table(test2$from, test2$Timestamp))
+test2$date <- ymd_hms(test2$V2)
+ggplot(data=test2, aes(x=date, y=N)) +
+  geom_bar(stat="identity", fill="steelblue")+
+  theme_minimal() + 
+  scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
