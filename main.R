@@ -66,16 +66,29 @@ ggplot(data = total, aes(x = date, y = hm)) +
                       limits=range(total$N)) +  
   scale_y_discrete( breaks = lab)
 
-# Plot number of messages sent during the specific day (fri,sat & sunday). 
-test2 = as.data.table(table(data_sat$Timestamp,data_sat$location))
-test2<-test2[!(test2$N<140),] 
-test2$date <- ymd_hms(test2$V1)
-names(test2)[names(test2) == 'V2'] <- 'location'
-d<-ggplot(test2, aes(x= date, y = N, fill = location)) + geom_point(aes(colour = location)) + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
+# Plot number of messages sent during friday 
+fri = as.data.table(table(data_fri$Timestamp,data_fri$location))
+fri<-fri[!(fri$N<140),] 
+fri$date <- ymd_hms(fri$V1)
+names(fri)[names(fri) == 'V2'] <- 'location'
+d<-ggplot(fri, aes(x= date, y = N, fill = location)) + geom_point(aes(colour = location)) + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
 d + labs(x = "Time") + labs(y="Number of messages")
 
+# Plot number of messages sent during saturday
+sat = as.data.table(table(data_sat$Timestamp,data_sat$location))
+sat<-sat[!(sat$N<140),] 
+sat$date <- ymd_hms(sat$V1)
+names(sat)[names(sat) == 'V2'] <- 'location'
+d<-ggplot(sat, aes(x= date, y = N, fill = location)) + geom_point(aes(colour = location)) + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
+d + labs(x = "Time") + labs(y="Number of messages")
 
-
+# Plot number of messages sent during sunday
+sun = as.data.table(table(data_sun$Timestamp,data_sun$location))
+sun<-sun[!(sun$N<140),] 
+sun$date <- ymd_hms(sun$V1)
+names(sun)[names(sun) == 'V2'] <- 'location'
+d<-ggplot(sun, aes(x= date, y = N, fill = location)) + geom_point(aes(colour = location)) + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
+d + labs(x = "Time") + labs(y="Number of messages")
 
 ## TESTING ONLY ##
 library(qgraph)
