@@ -18,40 +18,40 @@ data_sun <- fread('comm-data-Sun.csv', header = T, sep = ',')
 # Longest common subsequence to determine who communicates with the most people under a sequence.
 # Flag suspect person based on communication patterns.
 
-#Plot communication distribution over locations for Friday as bar chart.
+# Plot communication distribution over locations for Friday as bar chart.
 table_fri <- as.data.table(table(data_fri$location)) 
 xx <- barplot(table_fri$N, names.arg = table_fri$V1, cex.names = 0.8, ylim = c(0, max(table_fri$N)+30000), main = "Communication distribution over locations for Friday")
 text(x = xx, y = table_fri$N, label = table_fri$N, pos = 3, cex = 0.8, col = "red")
 
-#Plot communication distribution over locations for Saturday as bar chart.
+# Plot communication distribution over locations for Saturday as bar chart.
 table_sat <- as.data.table(table(data_sat$location)) 
 xx <- barplot(table_sat$N, names.arg = table_sat$V1, cex.names = 0.8, ylim = c(0, max(table_sat$N)+65000), main = "Communication distribution over locations for Saturday")
 text(x = xx, y = table_sat$N, label = table_sat$N, pos = 3, cex = 0.8, col = "red")
 
-#Plot communication distribution over locations for Sunday as bar chart.
+# Plot communication distribution over locations for Sunday as bar chart.
 table_sun <- as.data.table(table(data_sun$location)) 
 xx <- barplot(table_sun$N, names.arg = table_sun$V1, cex.names = 0.8, ylim = c(0, max(table_sun$N)+60000), main = "Communication distribution over locations for Sunday")
 text(x = xx, y = table_sun$N, label = table_sun$N, pos = 3, cex = 0.8, col = "red")
 
-#Plot communication distribution over time for Friday as linear line plot.
+# Plot communication distribution over time for Friday as linear line plot.
 test_fri <- as.data.table(table(data_fri$Timestamp))
 test_fri<-test_fri[!(test_fri$N<100),]
 test_fri$date <- ymd_hms(test_fri$V1)
 ggplot(data = test_fri, aes(x = date, y = N)) + geom_line() + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
 
-#Plot communication distribution over time for Saturday as linear line plot.
+# Plot communication distribution over time for Saturday as linear line plot.
 test_sat <- as.data.table(table(data_sat$Timestamp))
 test_sat<-test_sat[!(test_sat$N<100),]
 test_sat$date <- ymd_hms(test_sat$V1)
 ggplot(data = test_sat, aes(x = date, y = N)) + geom_line() + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
 
-#Plot communication distribution over time for Sunday as linear line plot.
+# Plot communication distribution over time for Sunday as linear line plot.
 test_sun <- as.data.table(table(data_sun$Timestamp))
 test_sun<-test_sun[!(test_sun$N<100),]
 test_sun$date <- ymd_hms(test_sun$V1)
 ggplot(data = test_sun, aes(x = date, y = N)) + geom_line() + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
 
-#Heatmap of total amount of communication for all days.
+# Heatmap of total amount of communication for all days.
 total <- rbind(data_fri, data_sat, data_sun)
 total <- as.data.table(table(total$Timestamp))
 total<-total[!(total$N<350),]
@@ -65,6 +65,16 @@ ggplot(data = total, aes(x = date, y = hm)) +
   scale_fill_gradientn(colors = c("Yellow", "Orange", "Red"), 
                       limits=range(total$N)) +  
   scale_y_discrete( breaks = lab)
+
+# Plot number of messages sent during the specific day (fri,sat & sunday). 
+test2 = as.data.table(table(data_sat$Timestamp,data_sat$location))
+test2<-test2[!(test2$N<140),] 
+test2$date <- ymd_hms(test2$V1)
+names(test2)[names(test2) == 'V2'] <- 'location'
+d<-ggplot(test2, aes(x= date, y = N, fill = location)) + geom_point(aes(colour = location)) + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
+d + labs(x = "Time") + labs(y="Number of messages")
+
+
 
 
 ## TESTING ONLY ##
