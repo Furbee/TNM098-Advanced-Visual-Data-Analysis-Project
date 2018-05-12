@@ -1,4 +1,6 @@
 rm(list = ls())
+setwd("~/Documents/DavidTran/Projects/TNM098-Advanced-Visual-Data-Analysis-Project")
+
 library(data.table)
 library(scales)
 library(ggplot2)
@@ -152,7 +154,15 @@ split[, ':='(dummy = 1,
 split = unique(split[, .(edge_1, edge_2, sum(dummy)), by = key])[, 2:4, with =
                                                                    F]
 lol <- as.data.table(split)
-#g <- graph.data.frame(lol)
+lol <- lol[!lol$edge_1 == 1278894,]
+lol <- lol[!lol$edge_2 == 1278894,]
+lol <- lol[!lol$V3 < 30,]
+
+g <- graph.data.frame(lol)
+SCC <- clusters(g, mode="strong")  
+V(g)$color <- rainbow(SCC$no)[SCC$membership]
+V(g)$label.cex = 0.5
+plot(g, mark.groups = split(1:vcount(g), SCC$membership),edge.arrow.size = 0.5)
 #plot(g, edge.arrow.size = 0.1,vertex.label=NA)
 
 #Testing only. Every 5 minute for one hour with one hour break from 12:00.
@@ -174,6 +184,5 @@ ext = as.data.table(table(testSun$Timestamp, testSun$location))
 ext <- ext[!(ext$N < 1), ]
 ext$date <- ymd_hms(ext$V1)
 names(ext)[names(ext) == 'V2'] <- 'location'
-p <-
-  ggplot(ext, aes(x = date, y = N, fill = location)) + geom_point(aes(colour = location)) + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
+p <- ggplot(ext, aes(x = date, y = N, fill = location)) + geom_point(shape = 21,aes(colour = location)) + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
 p + labs(x = "Time") + labs(y = "Number of messages")
