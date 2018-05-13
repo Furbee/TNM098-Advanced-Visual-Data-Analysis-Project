@@ -1,14 +1,13 @@
 rm(list = ls())
 setwd("~/Documents/DavidTran/Projects/TNM098-Advanced-Visual-Data-Analysis-Project")
-
+source("functions.R")
 library(data.table)
 library(scales)
 library(ggplot2)
 library(lubridate)
-library(dplyr)
 library(igraph)
 
-
+## READ DATA FILES ##
 data_fri <- fread('comm-data-Fri.csv', header = T, sep = ',')
 data_sat <- fread('comm-data-Sat.csv', header = T, sep = ',')
 data_sun <- fread('comm-data-Sun.csv', header = T, sep = ',')
@@ -20,151 +19,46 @@ data_sun <- fread('comm-data-Sun.csv', header = T, sep = ',')
 # Longest common subsequence to determine who communicates with the most people under a sequence.
 # Flag suspect person based on communication patterns.
 
-# Plot communication distribution over locations for Friday as bar chart.
+
+
+# Plot communication distribution over locations for Friday, Saturday and Sunday as bar chart.
 table_fri <- as.data.table(table(data_fri$location))
-xx <-
-  barplot(
-    table_fri$N,
-    names.arg = table_fri$V1,
-    cex.names = 0.8,
-    ylim = c(0, max(table_fri$N) + 30000),
-    main = "Communication distribution over locations for Friday"
-  )
-text(
-  x = xx,
-  y = table_fri$N,
-  label = table_fri$N,
-  pos = 3,
-  cex = 0.8,
-  col = "red"
-)
-
-# Plot communication distribution over locations for Saturday as bar chart.
 table_sat <- as.data.table(table(data_sat$location))
-xx <-
-  barplot(
-    table_sat$N,
-    names.arg = table_sat$V1,
-    cex.names = 0.8,
-    ylim = c(0, max(table_sat$N) + 65000),
-    main = "Communication distribution over locations for Saturday"
-  )
-text(
-  x = xx,
-  y = table_sat$N,
-  label = table_sat$N,
-  pos = 3,
-  cex = 0.8,
-  col = "red"
-)
-
-# Plot communication distribution over locations for Sunday as bar chart.
 table_sun <- as.data.table(table(data_sun$location))
-xx <-
-  barplot(
-    table_sun$N,
-    names.arg = table_sun$V1,
-    cex.names = 0.8,
-    ylim = c(0, max(table_sun$N) + 60000),
-    main = "Communication distribution over locations for Sunday"
-  )
-text(
-  x = xx,
-  y = table_sun$N,
-  label = table_sun$N,
-  pos = 3,
-  cex = 0.8,
-  col = "red"
-)
+com_dist_bar(table_fri, day = "Friday")
+com_dist_bar(table_sat, day = "Saturday")
+com_dist_bar(table_sun, day = "Sunday")
 
-# Plot communication distribution over time for Friday as linear line plot.
-test_fri <- as.data.table(table(data_fri$Timestamp))
-test_fri <- test_fri[!(test_fri$N < 100), ]
-test_fri$date <- ymd_hms(test_fri$V1)
-ggplot(data = test_fri, aes(x = date, y = N)) + geom_line() + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
 
-# Plot communication distribution over time for Saturday as linear line plot.
-test_sat <- as.data.table(table(data_sat$Timestamp))
-test_sat <- test_sat[!(test_sat$N < 100), ]
-test_sat$date <- ymd_hms(test_sat$V1)
-ggplot(data = test_sat, aes(x = date, y = N)) + geom_line() + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
+# Plot communication distribution over time for Friday, Saturday and Sunday as linear line plot.
+linear_fri <- as.data.table(table(data_fri$Timestamp))
+linear_sat <- as.data.table(table(data_sat$Timestamp))
+linear_sun <- as.data.table(table(data_sun$Timestamp))
+com_dist_linear(linear_fri, day = "Friday")
+com_dist_linear(linear_sat, day = "Saturday")
+com_dist_linear(linear_sun, day = "Sunday")
 
-# Plot communication distribution over time for Sunday as linear line plot.
-test_sun <- as.data.table(table(data_sun$Timestamp))
-test_sun <- test_sun[!(test_sun$N < 100), ]
-test_sun$date <- ymd_hms(test_sun$V1)
-ggplot(data = test_sun, aes(x = date, y = N)) + geom_line() + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
+# Plot number of messages sent on each location during Friday, Saturday and Sunday as scatter plots
+scatter_fri = as.data.table(table(data_fri$Timestamp, data_fri$location))
+scatter_sat = as.data.table(table(data_sat$Timestamp, data_sat$location))
+scatter_sun = as.data.table(table(data_sun$Timestamp, data_sun$location))
 
-# Heatmap of total amount of communication for all days.
-total <- rbind(data_fri, data_sat, data_sun)
-total <- as.data.table(table(total$Timestamp))
-total <- total[!(total$N < 350), ]
-total$V1 <- ymd_hms(total$V1)
-total$date <- as.Date(total$V1, format = "%Y-%m-%d")
-total$hm <- format(total$V1, "%H:%M:%S")
-lab <-
-  unique(with(total, paste(format(total$V1, "%H:00"), "00", sep = ":")))
+com_dist_scatter_location(scatter_fri, day = "Friday")
+com_dist_scatter_location(scatter_sat, day = "Saturday")
+com_dist_scatter_location(scatter_sat, day = "Sunday")
 
-ggplot(data = total, aes(x = date, y = hm)) +
-  geom_tile(aes(fill = N)) +
-  scale_fill_gradientn(colors = c("Yellow", "Orange", "Red"),
-                       limits = range(total$N)) +
-  scale_y_discrete(breaks = lab)
 
-# Plot number of messages sent during friday
-fri = as.data.table(table(data_fri$Timestamp, data_fri$location))
-fri <- fri[!(fri$N < 140), ]
-fri$date <- ymd_hms(fri$V1)
-names(fri)[names(fri) == 'V2'] <- 'location'
-d <-
-  ggplot(fri, aes(x = date, y = N, fill = location)) + geom_point(aes(colour = location)) + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
-d + labs(x = "Time") + labs(y = "Number of messages")
+# Plot network graph using iGraph package, reveal group of park visitors for each day.
+graph_fri <- data_fri[, 2:3]
+graph_sat <- data_sat[, 2:3]
+graph_sun <- data_sun[, 2:3]
 
-# Plot number of messages sent during saturday
-sat = as.data.table(table(data_sat$Timestamp, data_sat$location))
-sat <- sat[!(sat$N < 140), ]
-sat$date <- ymd_hms(sat$V1)
-names(sat)[names(sat) == 'V2'] <- 'location'
-d <-
-  ggplot(sat, aes(x = date, y = N, fill = location)) + geom_point(aes(colour = location)) + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
-d + labs(x = "Time") + labs(y = "Number of messages")
+group_graph(graph_fri, day = "Friday")
+group_graph(graph_sat, day = "Saturday")
+group_graph(graph_sun, day = "Sunday")
 
-ggplot(sat, aes(x = date, y = N, fill = location)) + geom_point(aes(colour = location)) + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
 
-# Plot number of messages sent during sunday
-sun = as.data.table(table(data_sun$Timestamp, data_sun$location))
-sun <- sun[!(sun$N < 140), ]
-sun$date <- ymd_hms(sun$V1)
-names(sun)[names(sun) == 'V2'] <- 'location'
-d <-
-  ggplot(sun, aes(x = date, y = N, fill = location)) + geom_point(aes(colour = location)) + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
-d + labs(x = "Time") + labs(y = "Number of messages")
-
-## TESTING ONLY ##
-library(qgraph)
-require(splitstackshape)
-test <- data_fri[, 2:3]
-test <- as.matrix(test)
-g <- graph.data.frame(test)
-edge = as_ids(E(g))
-edge = as.data.frame(edge)
-split = as.data.table(cSplit(edge, "edge", "|"))
-split[, ':='(dummy = 1,
-             key = paste(edge_1, edge_2, sep = "_"))]
-split = unique(split[, .(edge_1, edge_2, sum(dummy)), by = key])[, 2:4, with =
-                                                                   F]
-lol <- as.data.table(split)
-lol <- lol[!lol$edge_1 == 1278894,]
-lol <- lol[!lol$edge_2 == 1278894,]
-lol <- lol[!lol$V3 < 30,]
-
-g <- graph.data.frame(lol)
-SCC <- clusters(g, mode="strong")  
-V(g)$color <- rainbow(SCC$no)[SCC$membership]
-V(g)$label.cex = 0.5
-plot(g, mark.groups = split(1:vcount(g), SCC$membership),edge.arrow.size = 0.5)
-#plot(g, edge.arrow.size = 0.1,vertex.label=NA)
-
+## TESTING PHASE ONLY ##
 #Testing only. Every 5 minute for one hour with one hour break from 12:00.
 test2 <- data_fri
 test2 <- test2[!test2$from != 1278894, ]
