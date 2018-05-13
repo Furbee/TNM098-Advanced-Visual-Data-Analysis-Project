@@ -25,10 +25,25 @@ data_sun <- fread('comm-data-Sun.csv', header = T, sep = ',')
 table_fri <- as.data.table(table(data_fri$location))
 table_sat <- as.data.table(table(data_sat$location))
 table_sun <- as.data.table(table(data_sun$location))
+table_fri$day <- c("Friday")
+table_sat$day <- c("Saturday")
+table_sun$day <- c("Sunday")
+
 com_dist_bar(table_fri, day = "Friday")
 com_dist_bar(table_sat, day = "Saturday")
 com_dist_bar(table_sun, day = "Sunday")
 
+# Bar charts for each day combined
+total <- rbind(table_fri, table_sat, table_sun)
+total = melt(total)
+ggplot(data=total, aes(x=V1, y=value, fill=day)) +
+  geom_bar(stat="identity", color="black", position=position_dodge())+
+  theme_minimal() +
+  scale_y_continuous(labels = scales::comma) +
+  geom_text(aes(label=value),position=position_dodge(width = 1), vjust=-0.3, size=2.5) +
+  xlab("Park Locations") +
+  ylab("Number of messages") +
+  ggtitle("Communication distribution over locations during the weekend")
 
 # Plot communication distribution over time for Friday, Saturday and Sunday as linear line plot.
 linear_fri <- as.data.table(table(data_fri$Timestamp))
@@ -75,7 +90,7 @@ testSun <- data_sun
 testSun <- testSun[!testSun$to != 'external',]
 
 ext = as.data.table(table(testSun$Timestamp, testSun$location))
-ext <- ext[!(ext$N < 1), ]
+ext <- ext[!(ext$N < 2), ]
 ext$date <- ymd_hms(ext$V1)
 names(ext)[names(ext) == 'V2'] <- 'location'
 p <- ggplot(ext, aes(x = date, y = N, fill = location)) + geom_point(shape = 21,aes(colour = location)) + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
