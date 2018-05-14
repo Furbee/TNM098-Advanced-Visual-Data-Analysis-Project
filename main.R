@@ -40,10 +40,12 @@ ggplot(data=total, aes(x=V1, y=value, fill=day)) +
   geom_bar(stat="identity", color="black", position=position_dodge())+
   theme_minimal() +
   scale_y_continuous(labels = scales::comma) +
-  geom_text(aes(label=value),position=position_dodge(width = 1), vjust=-0.3, size=2.5) +
+  geom_text(aes(label=value),position=position_dodge(width = 1), vjust=-0.3, size=7.5) +
   xlab("Park Locations") +
   ylab("Number of messages") +
-  ggtitle("Communication distribution over locations during the weekend")
+  ggtitle("Communication distribution over locations during the weekend") +
+  theme(plot.title = element_text(size = 25),text = element_text(size=30))
+
 
 # Plot communication distribution over time for Friday, Saturday and Sunday as linear line plot.
 linear_fri <- as.data.table(table(data_fri$Timestamp))
@@ -60,7 +62,7 @@ scatter_sun = as.data.table(table(data_sun$Timestamp, data_sun$location))
 
 com_dist_scatter_location(scatter_fri, day = "Friday")
 com_dist_scatter_location(scatter_sat, day = "Saturday")
-com_dist_scatter_location(scatter_sat, day = "Sunday")
+com_dist_scatter_location(scatter_sun, day = "Sunday")
 
 
 # Plot network graph using iGraph package, reveal group of park visitors for each day.
@@ -75,18 +77,35 @@ group_graph(graph_sun, day = "Sunday")
 
 ## TESTING PHASE ONLY ##
 #Testing only. Every 5 minute for one hour with one hour break from 12:00.
-test2 <- data_fri
+test2 <- data_sat
 test2 <- test2[!test2$from != 1278894, ]
 test2 <- as.data.table(table(test2$from, test2$Timestamp))
 test2$date <- ymd_hms(test2$V2)
 ggplot(data = test2, aes(x = date, y = N)) +
   geom_bar(stat = "identity", fill = "steelblue") +
   theme_minimal() +
-  scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
+  scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))+
+  xlab("Time") +
+  ylab("Number of messages") +
+  ggtitle("Communication pattern for ID 1278894 on Saturday") +
+  theme(text = element_text(size=30),
+        axis.text.x = element_text(angle=70, hjust=1)) 
 
+test2 <- data_sun
+test2 <- test2[!test2$from != 839736, ]
+test2 <- as.data.table(table(test2$from, test2$Timestamp))
+test2$date <- ymd_hms(test2$V2)
+ggplot(data = test2, aes(x = date, y = N)) +
+  geom_point(shape = 21, size = 6, stroke = 2, colour = "black", fill = "firebrick2") + 
+  scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))+
+  xlab("Time") +
+  ylab("Number of messages") +
+  ggtitle("Communication pattern for ID 839736 on Sunday") +
+  theme(text = element_text(size=30),
+        axis.text.x = element_text(angle=70, hjust=1)) 
 
 # Testing only. Plot external communication 
-testSun <- data_sun
+testSun <- data_fri
 testSun <- testSun[!testSun$to != 'external',]
 
 ext = as.data.table(table(testSun$Timestamp, testSun$location))

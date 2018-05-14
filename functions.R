@@ -17,8 +17,10 @@ com_dist_linear <- function(linear_data, day){
     geom_line() + 
     scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M")) +
     xlab("Time") +
-    ylab("Number of messages") + 
-    ggtitle(day)
+    ylab("Number of messages") +
+    ggtitle(day) +
+    theme(text = element_text(size=30),
+          axis.text.x = element_text(angle=70, hjust=1)) 
 }
 
 com_dist_scatter_location <- function(scatter_data, day){
@@ -27,10 +29,12 @@ com_dist_scatter_location <- function(scatter_data, day){
   scatter_data$date <- ymd_hms(scatter_data$V1)
   names(scatter_data)[names(scatter_data) == 'V2'] <- 'location'
   ggplot(scatter_data, aes(x = date, y = N, fill = location)) + 
-    geom_point(aes(colour = location)) + 
+    geom_point(shape = 21, size = 6, stroke = 2, colour = "black",aes(fill = location)) + 
     scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M")) + 
     labs(x = "Time") + labs(y = "Number of messages") + 
-    ggtitle(day)
+    ggtitle(day) +
+    theme(text = element_text(size=25),
+          axis.text.x = element_text(angle=70, hjust=1)) 
 }
 
 group_graph <- function(graph_data, day){
@@ -56,7 +60,7 @@ group_graph <- function(graph_data, day){
   g <- graph.data.frame(g)
   SCC <- clusters(g, mode="strong")  
   V(g)$color <- rainbow(SCC$no)[SCC$membership]
-  V(g)$label.cex = 0.5
+  V(g)$label.cex = 0.55
   
   plot(g, mark.groups = split(1:vcount(g), SCC$membership),edge.arrow.size = 0.1, vertex.size = 7)
   title(day,cex.main=2)
