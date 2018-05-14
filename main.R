@@ -105,7 +105,7 @@ ggplot(data = test2, aes(x = date, y = N)) +
         axis.text.x = element_text(angle=70, hjust=1)) 
 
 # Testing only. Plot external communication 
-testSun <- data_fri
+testSun <- data_sun
 testSun <- testSun[!testSun$to != 'external',]
 
 ext = as.data.table(table(testSun$Timestamp, testSun$location))
