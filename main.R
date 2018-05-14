@@ -108,19 +108,4 @@ ggplot(data = test2, aes(x = date, y = N)) +
   ylab("Number of messages") +
   ggtitle("Communication pattern for ID 839736 on Sunday") +
   theme(text = element_text(size=30),
-<<<<<<< HEAD
         axis.text.x = element_text(angle=70, hjust=1)) 
-=======
-        axis.text.x = element_text(angle=70, hjust=1)) 
-
-# Testing only. Plot external communication 
-testSun <- data_sun
-testSun <- testSun[!testSun$to != 'external',]
-
-ext = as.data.table(table(testSun$Timestamp, testSun$location))
-ext <- ext[!(ext$N < 2), ]
-ext$date <- ymd_hms(ext$V1)
-names(ext)[names(ext) == 'V2'] <- 'location'
-p <- ggplot(ext, aes(x = date, y = N, fill = location)) + geom_point(shape = 21,aes(colour = location)) + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
-p + labs(x = "Time") + labs(y = "Number of messages")
->>>>>>> e3274f0722f98be329ba6626b6f44758342dc00c
