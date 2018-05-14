@@ -19,8 +19,6 @@ data_sun <- fread('comm-data-Sun.csv', header = T, sep = ',')
 # Longest common subsequence to determine who communicates with the most people under a sequence.
 # Flag suspect person based on communication patterns.
 
-
-
 # Plot communication distribution over locations for Friday, Saturday and Sunday as bar chart.
 table_fri <- as.data.table(table(data_fri$location))
 table_sat <- as.data.table(table(data_sat$location))
@@ -46,6 +44,16 @@ ggplot(data=total, aes(x=V1, y=value, fill=day)) +
   ggtitle("Communication distribution over locations during the weekend") +
   theme(plot.title = element_text(size = 25),text = element_text(size=30))
 
+# Plot external communication during Sunday 
+ext <- data_sun
+ext <- ext[!ext$to != 'external',]
+ext = as.data.table(table(ext$Timestamp, ext$location))
+ext <- ext[!(ext$N < 2), ]
+ext$date <- ymd_hms(ext$V1)
+names(ext)[names(ext) == 'V2'] <- 'location'
+p <- ggplot(ext, aes(x = date, y = N, fill = location)) + geom_point(shape = 21,aes(colour = location)) + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
+p + labs(x = "Time") + labs(y = "Number of messages")
+p + scale_y_continuous(breaks=seq(0,20,1))
 
 # Plot communication distribution over time for Friday, Saturday and Sunday as linear line plot.
 linear_fri <- as.data.table(table(data_fri$Timestamp))
@@ -64,7 +72,6 @@ com_dist_scatter_location(scatter_fri, day = "Friday")
 com_dist_scatter_location(scatter_sat, day = "Saturday")
 com_dist_scatter_location(scatter_sun, day = "Sunday")
 
-
 # Plot network graph using iGraph package, reveal group of park visitors for each day.
 graph_fri <- data_fri[, 2:3]
 graph_sat <- data_sat[, 2:3]
@@ -73,7 +80,6 @@ graph_sun <- data_sun[, 2:3]
 group_graph(graph_fri, day = "Friday")
 group_graph(graph_sat, day = "Saturday")
 group_graph(graph_sun, day = "Sunday")
-
 
 ## TESTING PHASE ONLY ##
 #Testing only. Every 5 minute for one hour with one hour break from 12:00.
@@ -103,14 +109,3 @@ ggplot(data = test2, aes(x = date, y = N)) +
   ggtitle("Communication pattern for ID 839736 on Sunday") +
   theme(text = element_text(size=30),
         axis.text.x = element_text(angle=70, hjust=1)) 
-
-# Testing only. Plot external communication 
-testSun <- data_fri
-testSun <- testSun[!testSun$to != 'external',]
-
-ext = as.data.table(table(testSun$Timestamp, testSun$location))
-ext <- ext[!(ext$N < 2), ]
-ext$date <- ymd_hms(ext$V1)
-names(ext)[names(ext) == 'V2'] <- 'location'
-p <- ggplot(ext, aes(x = date, y = N, fill = location)) + geom_point(shape = 21,aes(colour = location)) + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
-p + labs(x = "Time") + labs(y = "Number of messages")
