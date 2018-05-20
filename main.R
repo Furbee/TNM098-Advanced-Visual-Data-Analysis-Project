@@ -44,6 +44,14 @@ ggplot(data=total, aes(x=V1, y=value, fill=day)) +
   ggtitle("Communication distribution over locations during the weekend") +
   theme(plot.title = element_text(size = 25),text = element_text(size=30))
 
+# Plot communication distribution over time for Friday, Saturday and Sunday as linear line plot.
+linear_fri <- as.data.table(table(data_fri$Timestamp))
+linear_sat <- as.data.table(table(data_sat$Timestamp))
+linear_sun <- as.data.table(table(data_sun$Timestamp))
+com_dist_linear(linear_fri, day = "Friday")
+com_dist_linear(linear_sat, day = "Saturday")
+com_dist_linear(linear_sun, day = "Sunday")
+
 # Plot external communication during Sunday 
 ext <- data_sun
 ext <- ext[!ext$to != 'external',]
@@ -54,14 +62,6 @@ names(ext)[names(ext) == 'V2'] <- 'location'
 p <- ggplot(ext, aes(x = date, y = N, fill = location)) + geom_point(shape = 21,aes(colour = location)) + scale_x_datetime(breaks = date_breaks("30 min"), labels = date_format("%H:%M"))
 p + labs(x = "Time") + labs(y = "Number of messages")
 p + scale_y_continuous(breaks=seq(0,20,1))
-
-# Plot communication distribution over time for Friday, Saturday and Sunday as linear line plot.
-linear_fri <- as.data.table(table(data_fri$Timestamp))
-linear_sat <- as.data.table(table(data_sat$Timestamp))
-linear_sun <- as.data.table(table(data_sun$Timestamp))
-com_dist_linear(linear_fri, day = "Friday")
-com_dist_linear(linear_sat, day = "Saturday")
-com_dist_linear(linear_sun, day = "Sunday")
 
 # Plot number of messages sent on each location during Friday, Saturday and Sunday as scatter plots
 scatter_fri = as.data.table(table(data_fri$Timestamp, data_fri$location))
